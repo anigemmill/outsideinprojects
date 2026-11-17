@@ -1,20 +1,50 @@
 @import "tailwindcss";
 
-/* Placeholder theme until the design-system milestone. Colours are tokens, never raw hex in components. */
+/*
+  Neutral Outside In theme for the account pages, so they don't look like any one product.
+  Components use these tokens, never raw hex. Every text/background pair is at least 4.5:1, and
+  control borders and focus rings at least 3:1, in both modes (checked 17 Nov 2026).
+*/
 :root {
-  --color-bg: #FFFFFF;
-  --color-text: #1F2328;
-  --color-text-muted: #57606A;
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-text: #1f2328;
+  --color-text-muted: #57606a;
+  --color-border: #d8dee4; /* decorative dividers only */
+  --color-border-control: #7d8590;
+  --color-action: #1f2328;
+  --color-on-action: #ffffff;
+  --color-link: #0b5cad;
+  --color-focus: #0b5cad;
+  --color-danger: #b42318;
+  --color-success: #1a7f37;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #16181C;
-    --color-text: #EDEFF2;
-    --color-text-muted: #A9B1BB;
+    --color-bg: #16181c;
+    --color-surface: #1f2228;
+    --color-text: #edeff2;
+    --color-text-muted: #a9b1bb;
+    --color-border: #30363d;
+    --color-border-control: #6e7781;
+    --color-action: #edeff2;
+    --color-on-action: #16181c;
+    --color-link: #7cb7ff;
+    --color-focus: #7cb7ff;
+    --color-danger: #ff8f80;
+    --color-success: #5fd07e;
   }
 }
 body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: system-ui, sans-serif;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

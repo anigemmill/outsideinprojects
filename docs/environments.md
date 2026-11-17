@@ -27,8 +27,8 @@ Rules:
 |---|---|---|---|---|---|
 | `APP_URL` | No | Public URL of the account pages | `http://localhost:3100` | dev URL | `https://account.[DOMAIN]` |
 | `DATABASE_URL` | **Yes** | Direct Postgres connection for migrations and server queries | local Postgres | `accounts-dev` pooler URL | `accounts-prod` pooler URL |
-| `NEXT_PUBLIC_SUPABASE_URL` | No | Supabase Auth endpoint for the account pages | `accounts-dev` URL | `accounts-dev` URL | `accounts-prod` URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | No (public by design; RLS protects data) | Browser client for sign-in | dev key | dev key | prod key |
+| `SUPABASE_URL` | No | Supabase Auth endpoint for the account pages (read at start-up, not build time) | `accounts-dev` URL | `accounts-dev` URL | `accounts-prod` URL |
+| `SUPABASE_PUBLISHABLE_KEY` | No (public by design; RLS protects data). Read on the server only, so it isn't baked into the build |  Sign-in calls from the account pages' server | dev key | dev key | prod key |
 | `SUPABASE_SECRET_KEY` | **Yes** | Server-only admin actions (register OAuth clients, invite users). Bypasses RLS: used only in audited server code | dev key | dev key | prod key |
 | `ACCOUNTS_ISSUER` | No | Expected token issuer, `https://<ref>.supabase.co/auth/v1` | dev issuer | dev issuer | prod issuer |
 | `SERVICE_TOKEN_SIGNING_KEY` | **Yes** | Private key for service tokens (A5) | generated locally | generated per environment | generated per environment |

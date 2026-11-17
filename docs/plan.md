@@ -6,7 +6,7 @@ plan (`anigemmill/commandcentre` `docs/specs/11-milestones.md`).
 | # | Step | Done when |
 |---|---|---|
 | A1 ✅ 17 Nov | **Foundations.** Next.js + TypeScript strict, lint, CI, Supabase local stack, migrations, environment checks | CI green on an empty app; local stack starts with one command |
-| A2 | **Sign-in.** Supabase Auth: email + password, magic link, Google, Microsoft, MFA; account pages (sign up, sign in, reset, security) | A person can create an account, sign in, turn on MFA and sign out everywhere |
+| A2 🟡 in progress | **Sign-in.** Supabase Auth: email + password, magic link, Google, Microsoft, MFA; account pages (sign up, sign in, reset, security) | A person can create an account, sign in, turn on MFA and sign out everywhere |
 | A3 | **Organisations.** Organisations, memberships, organisation roles, invitations, RLS and isolation tests | Isolation tests pass for every table; an owner invites a teammate who joins |
 | A4 | **Product access and plans.** `product_access`, subscriptions assigned by staff (no Stripe yet), entitlements from each product's plan config | Staff give an organisation Command Centre; its members see it in the product switcher |
 | A5 | **Tokens for products.** OpenID Connect provider for the products, asymmetric signing keys, public JWKS, token claims (`spec.md` §4), token exchange between products | A test product verifies a token offline and reads the right organisation |
@@ -21,3 +21,20 @@ plan (`anigemmill/commandcentre` `docs/specs/11-milestones.md`).
 2. Findable: staging copy moved onto this service and tested, then production switched at a time agreed
    with Te Puia, with the old sign-in kept for a week as a fallback (`spec.md` §7).
 3. Reel Deal moved onto this service (`spec.md` §7).
+
+## A2 progress (17 Nov 2026)
+
+Built and checked without a running Supabase Auth:
+
+- Pages: sign in (password or emailed link), create account, check your email, forgot and reset
+  password, two-step sign-in (TOTP) challenge, account, security (set up and remove an authenticator
+  app), sign out and sign out everywhere, and the OAuth consent page that products are sent to.
+- Email-link landing routes for both Supabase link styles (`/auth/callback`, `/auth/confirm`).
+- Rules in code and tested: same message whether or not an account exists; only same-site redirects
+  after sign-in; MFA completed before account pages or approving a product; first-party products
+  approved without a prompt, any other client asked; honest message when Auth is unreachable.
+- Local Supabase Auth runner (`npm run auth:local`), written but not yet run in the build environment.
+
+Still to do for A2: run the full flow against real Supabase Auth (blocked until `accounts-dev` exists
+or the local runner is allowed to run), end-to-end tests of sign-up, email confirmation, MFA and the
+OAuth flow with a test product client, and Google/Microsoft sign-in.

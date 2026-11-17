@@ -38,3 +38,18 @@ records the ones that shape this service.
   The paid project in ANI is the fallback if the free quota is not available.
 - **Approved: Option A.** The owner is creating a free Supabase organisation for development.
   `accounts-dev` (Sydney) is created there only after its quoted cost is confirmed as US$0.
+
+## 2026-11-17: A2 implementation choices
+
+- **Server-only Supabase calls.** The account pages call Supabase Auth only from server actions and
+  routes; the session lives in httpOnly cookies on the account domain. So the settings are
+  `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`, read at start-up, not `NEXT_PUBLIC_` values baked in
+  at build time; one build runs in any environment.
+- **Verified identity on every request:** `getClaims()` (checks the token's signature with the signing
+  keys), never the unchecked session in the cookie.
+- **Local compatibility files are applied once and recorded**, like migrations. A bug where re-running
+  them re-granted default table privileges after the foundation migration had removed them was caught
+  by the database tests and fixed before commit; only `02_auth_grants.always.sql` (no default grants)
+  re-runs.
+- **Local Supabase Auth** is the official release binary, pinned by version and SHA-256 (Supabase
+  publishes no checksums, so the hash pins the file that was reviewed). Not used in CI.
