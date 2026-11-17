@@ -5,7 +5,7 @@ plan (`anigemmill/commandcentre` `docs/specs/11-milestones.md`).
 
 | # | Step | Done when |
 |---|---|---|
-| A1 | **Foundations.** Next.js + TypeScript strict, lint, CI, Supabase local stack, migrations, environment checks | CI green on an empty app; local stack starts with one command |
+| A1 ✅ 17 Nov | **Foundations.** Next.js + TypeScript strict, lint, CI, Supabase local stack, migrations, environment checks | CI green on an empty app; local stack starts with one command |
 | A2 | **Sign-in.** Supabase Auth: email + password, magic link, Google, Microsoft, MFA; account pages (sign up, sign in, reset, security) | A person can create an account, sign in, turn on MFA and sign out everywhere |
 | A3 | **Organisations.** Organisations, memberships, organisation roles, invitations, RLS and isolation tests | Isolation tests pass for every table; an owner invites a teammate who joins |
 | A4 | **Product access and plans.** `product_access`, subscriptions assigned by staff (no Stripe yet), entitlements from each product's plan config | Staff give an organisation Command Centre; its members see it in the product switcher |

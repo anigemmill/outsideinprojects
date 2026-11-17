@@ -3,7 +3,8 @@
 One account for every Outside In product. People sign in once; organisations add **Command Centre**,
 **Findable** and **Reel Deal** by subscribing to them.
 
-**Status: specification.** No code yet.
+**Status: step A1 (foundations) built.** App skeleton, environment checks, migrations with the RLS guard,
+local database and CI. No sign-in or accounts yet. Running it: [`docs/development.md`](docs/development.md).
 
 | Document | What it is |
 |---|---|

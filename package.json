@@ -1,0 +1,45 @@
+{
+  "name": "outside-in-accounts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "next start -p 3100",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "check:migrations": "tsx scripts/check-migrations.ts",
+    "check:env": "node --conditions=react-server --import tsx scripts/check-env.ts",
+    "check": "npm run check:migrations && npm run typecheck && npm run lint && npm run test",
+    "db:local": "scripts/db-local.sh start",
+    "db:stop": "scripts/db-local.sh stop",
+    "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/db-migrate.ts",
+    "setup": "npm run db:local && DATABASE_URL=$(scripts/db-local.sh url) npm run db:migrate",
+    "test:db": "TEST_DATABASE_URL=${TEST_DATABASE_URL:-$(scripts/db-local.sh url)} vitest run src/server/db"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "postgres": "^4.1.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.6",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}
