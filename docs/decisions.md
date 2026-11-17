@@ -19,7 +19,7 @@ records the ones that shape this service.
   Command Centre.
 - **Repository:** `anigemmill/outsideinprojects`.
 
-## 2026-11-17: shared identity and the development project (proposed, awaiting approval)
+## 2026-11-17: shared identity and the development project (approved by the owner, 17 Nov 2026)
 
 - **This service is the central identity service.** Its Supabase Auth (one project per environment)
   is the only customer sign-in for Command Centre, Findable and Reel Deal, through Supabase's OAuth 2.1
@@ -36,3 +36,5 @@ records the ones that shape this service.
 - **Recommendation:** a separate free organisation for development ("Outside In Development"), so
   development is separated from production by organisation, billing and team, not just by project.
   The paid project in ANI is the fallback if the free quota is not available.
+- **Approved: Option A.** The owner is creating a free Supabase organisation for development.
+  `accounts-dev` (Sydney) is created there only after its quoted cost is confirmed as US$0.

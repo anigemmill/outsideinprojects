@@ -1,6 +1,6 @@
 # Shared identity: how products sign people in
 
-Status: **proposed, awaiting owner approval** (17 Nov 2026). Refines `spec.md` §2 with the concrete
+Status: **approved by the owner** (17 Nov 2026). Refines `spec.md` §2 with the concrete
 Supabase mechanism. Nothing described here has been created yet.
 
 ## 1. Decisions in one table
