@@ -18,3 +18,21 @@ records the ones that shape this service.
 - **Findable moves early**, while it has one live business, after this service is built and tested with
   Command Centre.
 - **Repository:** `anigemmill/outsideinprojects`.
+
+## 2026-11-17: shared identity and the development project (proposed, awaiting approval)
+
+- **This service is the central identity service.** Its Supabase Auth (one project per environment)
+  is the only customer sign-in for Command Centre, Findable and Reel Deal, through Supabase's OAuth 2.1
+  / OpenID Connect server. Products keep separate databases and lock their own Supabase Auth.
+  Full design: `docs/identity-architecture.md`. Variables and secrets: `docs/environments.md`.
+- **OAuth 2.1 server is in beta**, free on all plans during the beta. Products use only standard OIDC so
+  the provider can be replaced; fallback keeps one identity (`identity-architecture.md` §7).
+- **Cost of a development project** (checked 17 Nov 2026 against Supabase's billing docs and the ANI
+  organisation, which is on Pro, billed through Vercel, with three active projects already):
+  a fourth project in ANI adds about **US$10 a month** of compute (Micro, US$0.01344 an hour, billed
+  hourly; the US$10 monthly compute credit is already used by the existing projects; compute is not
+  covered by the spend cap). A project in a separate **Free** organisation costs **US$0**, pauses after
+  7 days of low activity (restorable) and has no automated backups, which is acceptable for synthetic data.
+- **Recommendation:** a separate free organisation for development ("Outside In Development"), so
+  development is separated from production by organisation, billing and team, not just by project.
+  The paid project in ANI is the fallback if the free quota is not available.
