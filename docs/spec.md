@@ -72,11 +72,18 @@ they are product data. Shared business context still flows through the `07` cont
 
 ## 4. Token claims
 
+Target claims. With Supabase's OAuth 2.1 server, the product is identified by `client_id` (its OAuth
+client id), not `aud`, which stays generic unless a Custom Access Token Hook sets it. Products verify
+`client_id` (`identity-architecture.md` §2). `org`, `org_role` and `products` need that hook too.
+The `aud` value shown is Supabase's default for signed-in users; confirm it against a real token in
+A2 step 3.
+
 ```json
 {
-  "iss": "https://account.[DOMAIN]",
+  "iss": "https://<accounts project>.supabase.co/auth/v1",
   "sub": "<user id>",
-  "aud": "command_centre",
+  "client_id": "<Command Centre's OAuth client id>",
+  "aud": "authenticated",
   "org": "<active organisation id>",
   "org_role": "admin",
   "products": ["command_centre", "reel_deal"],

@@ -81,7 +81,7 @@ roles later?]**.
 
 | Table | Columns | Notes |
 |---|---|---|
-| `products` | `key` pk (`command_centre` \| `findable` \| `reel_deal`), `name`, `client_id` (OAuth client per environment), `status` | Seeded. The audience (`aud`) in tokens is the key |
+| `products` | `key` pk (`command_centre` \| `findable` \| `reel_deal`), `name`, `client_id` (OAuth client per environment), `status` | Seeded. Products recognise their tokens by `client_id` (`identity-architecture.md` §2), so each environment's client id is stored here |
 | `product_access` | pk (`org_id`, `user_id`, `product`), `product_role` text, `granted_by`, `granted_at` | May this member open this product for this organisation? `product_role` is the product's own role key (Command Centre `manager`, Reel Deal `editor`, …), validated against `products.roles` **[DECIDE: should accounts store product roles, or only "can open" with roles kept in each product?]** Foreign key to `memberships`, so access ends with membership |
 
 ### Subscriptions and entitlements

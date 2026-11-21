@@ -51,9 +51,17 @@ event; products drop their local session on receipt, and in any case can't refre
 
 ### What each product's server does (same pattern Reel Deal uses today)
 
-1. Verify the access token against the account service's JWKS: signature, `iss` (exactly the
-   environment's issuer), `aud`, `exp`. Reject everything else, including tokens from another
-   environment.
+1. Verify the access token against the account service's JWKS: signature (asymmetric algorithm
+   only), `iss` (exactly the environment's issuer), **`client_id` (exactly this product's OAuth
+   client id in this environment)** and `exp`. Reject everything else, including tokens from another
+   environment or issued to another product.
+
+   > **Which claim identifies the product (finding, 21 Nov 2026).** Supabase's OAuth 2.1 server puts
+   > the client in a `client_id` claim. `aud` is **not** the product: it stays Supabase's generic
+   > value unless a Custom Access Token Hook rewrites it. So products check `client_id`, never `aud`,
+   > to refuse a token issued to another product. If a hook later sets `aud` to the product key, check
+   > both. Tokens from the account pages' own sign-in carry no `client_id` and must be refused by
+   > every product.
 2. Read the user id (`sub`). Authorisation never trusts other token claims; it reads the product's
    local mirror (organisations, memberships, product access, entitlements) kept current by events.
 3. Run the request's queries in a transaction with `set local role authenticated` and

@@ -74,3 +74,24 @@ records the ones that shape this service.
   the new `accounts-dev` among Supabase hosts; the deleted project and Reel Deal's production project
   were removed from it, so development sessions cannot reach production.
 - **Account schema proposed** for review before any migration: `docs/schema-proposal.md` (A3–A4).
+
+## 2026-11-21: Auth configuration and the OAuth server (approved by the owner)
+
+- **Supabase Auth vs the OAuth 2.1 server.** Supabase Auth is this service's authentication
+  provider (users, passwords, MFA, sessions): required. The OAuth 2.1 server additionally makes this
+  project an OpenID Connect provider for other applications. It is **required for the approved
+  architecture**: one login across separately hosted products, with each product holding only its
+  own revocable tokens, needs a standard redirect protocol, and building one ourselves would be
+  custom auth. It is not needed for the account pages or the A3–A4 schema.
+- **Timing.** The OAuth server stays **off in `accounts-dev` until A2 step 3** (the first end-to-end
+  test with a product client), then on with authorisation path `/oauth/consent` and dynamic client
+  registration off. On in `accounts-prod` before Command Centre's first deployment.
+- **Approved Auth configuration** for development and production: `environments.md`.
+- **Finding: products check `client_id`, not `aud`.** Supabase's OAuth access tokens identify the
+  client in a `client_id` claim; `aud` stays generic unless a Custom Access Token Hook rewrites it.
+  Our design had products checking `aud`. Corrected in `identity-architecture.md` §2 and `spec.md` §4:
+  each product verifies `client_id` equals its own client id for the environment, and refuses tokens
+  without one (e.g. the account pages' own sessions). To be confirmed against a real token in A2
+  step 3. Command Centre's copies of the identity spec point here as the master.
+- **Open:** will all products live under one domain? The OAuth server is recommended either way, and
+  is the only workable route if any product keeps its own domain.

@@ -73,18 +73,39 @@ own `staging` entry in each product's `config/database-targets.json`; never a sh
 
 ### `accounts-dev` Auth settings (set in the dashboard; the database tools cannot change them)
 
-From `docs/identity-architecture.md` §6 step 1, matching `scripts/auth-local.ts`:
+**Approved by the owner, 21 Nov 2026** (`decisions.md`). Based on `identity-architecture.md` §6 step 1
+and `scripts/auth-local.ts`. Development values are set in `accounts-dev` now; production values are
+the plan for `accounts-prod`.
 
-| Setting | Value |
-|---|---|
-| JWT signing keys | Asymmetric (ES256 or RS256) as the current key; legacy HS256 secret not used by products |
-| OAuth 2.1 server | On; authorisation path `/oauth/consent` |
-| Site URL | `http://localhost:3100` until the account pages are deployed |
-| Redirect URLs | `http://localhost:3100/**` and the local test client `http://localhost:4555/**` |
-| Email provider | On; sign-ups allowed; **Confirm email on** |
-| Magic link | On (part of the email provider) |
-| Minimum password length | 12 |
-| Refresh token rotation | On |
-| MFA (TOTP) | Enrolment and verification on |
-| Access token lifetime (JWT expiry) | 900 seconds |
-| Other providers (Google, Microsoft, phone, anonymous) | Off for now |
+| Area | Setting | Development (`accounts-dev`) | Production (`accounts-prod`, later) |
+|---|---|---|---|
+| Sign-up | New sign-ups | On | On |
+| | Anonymous sign-ins, manual identity linking | Off | Off |
+| | CAPTCHA | Off | On: Cloudflare Turnstile (free) [CONFIRM] |
+| Email | Email provider, magic link / email OTP | On | On |
+| | Confirm email | **On** | **On** |
+| | Secure email change (both addresses confirm) | On | On |
+| | Sender | Supabase built-in mailer (reaches only the Supabase organisation's members) | Custom SMTP (Resend), branded templates |
+| Passwords | Minimum length | **12** | **12** |
+| | Required character types | None (length over complexity) | None |
+| | Leaked password protection | Not on the free plan | On (paid plan) |
+| | Secure password change | Off (the account pages check the current password) | Off |
+| MFA | TOTP enrolment and verification | **On** | On |
+| | Phone / SMS MFA | Off | Off |
+| | Max factors per user | 10 | 10 |
+| | Enforcement | Not forced at sign-in; an enrolled factor must be completed before account pages or product approval; organisations that require MFA are enforced by products on sensitive actions | Same; consider requiring it for owners and admins [CONFIRM] |
+| Sessions and tokens | Access token (JWT) expiry | **900 s** | 900 s |
+| | Refresh token rotation; reuse interval | On; 10 s | On; 10 s |
+| | Inactivity timeout, time-boxed sessions, single session per user | Off | Consider 30-day inactivity [CONFIRM]; single session off |
+| JWT signing | Current key | **ES256 asymmetric** (already current; confirmed from the public JWKS, 21 Nov 2026) | ES256, generated in that project |
+| | Legacy HS256 secret and legacy API keys | Present but unused by products; use the new publishable and secret keys | Disable legacy API keys once unused |
+| URLs | Site URL | `http://localhost:3100` | `https://account.[DOMAIN]` |
+| | Redirect URLs (email links) | `http://localhost:3100/**`, `http://localhost:4555/**` | `https://account.[DOMAIN]/**` only |
+| OAuth 2.1 server | Enabled | **Off until A2 step 3** (first end-to-end test with a product client) | On before Command Centre's first deployment |
+| | Authorisation path | `/oauth/consent` | `/oauth/consent` |
+| | Dynamic client registration | **Off** | **Off** |
+| | Clients | Registered by hand, confidential, PKCE: test client `http://localhost:4555/callback`; Command Centre local `http://localhost:3000/auth/callback` | One per product with production callbacks; secrets only in each host's secret store |
+| | Claim products verify | `client_id` (`identity-architecture.md` §2) | `client_id` |
+| Providers | Google, Microsoft | Off (need Google Cloud and Entra registrations) | On when registered |
+| | Phone | Off | Off |
+| Rate limits | | Supabase defaults | Review: sign-ins come from the account pages' server, so many people share few IP addresses |
