@@ -48,12 +48,17 @@ Postgres 16 service, on every push and pull request.
   the database tests fail if it returns anything.
 - New tables get **no** privileges for `anon` or `authenticated` by default (the foundation migration
   removes Supabase's broad defaults). Grant what a table needs explicitly.
+- **Target guard.** `npm run db:migrate` first checks the target (`src/server/db/migration-guard.ts`):
+  a Supabase project must be listed in `config/database-targets.json` (today only `accounts-dev`,
+  `egtlqrmujhxelczbyszj`), and a database carrying another product's meta schema or identity marker
+  is refused. Nothing is written when the check fails. Add a project to the config only when it is
+  created for this service, never another product's.
 
 ## Sign-in (Supabase Auth)
 
 The account pages talk to Supabase Auth from the server only. Two ways to run them:
 
-1. **Against `accounts-dev`** (the hosted development project, once it exists): put its URL and keys
+1. **Against `accounts-dev`** (the hosted development project, `egtlqrmujhxelczbyszj`, created 19 Nov 2026): put its URL and keys
    in `.env.local` (`docs/environments.md`).
 2. **Against real Supabase Auth on your machine:** `npm run auth:local` downloads the pinned Supabase
    Auth release (`v2.198.0`, SHA-256 checked), generates local-only signing keys, and runs it at

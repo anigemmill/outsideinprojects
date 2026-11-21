@@ -49,11 +49,42 @@ Rules:
 Variables are added to `.env.example` (names only) and to `src/server/env.ts` (validation) in the same
 change that first uses them.
 
-## Supabase projects
+## Supabase projects: which project belongs to which product
 
-| Project | Organisation | Region | Purpose | Data | Status |
-|---|---|---|---|---|---|
-| `accounts-dev` | Proposed: a separate free "Outside In Development" organisation (see `decisions.md`) | Sydney (`ap-southeast-2`) | Development identity for all products | Synthetic only | **Not created; awaiting approval** |
-| `accounts-prod` | ANI (Pro) | Sydney | Production identity | Real | Later, before first customer use |
-| `commandcentre-dev` | Same as `accounts-dev` | Sydney | Command Centre development data | Synthetic only | Later, at first deploy |
-| `commandcentre-prod` | ANI (Pro) | Sydney | Command Centre production data | Real | Later |
+Every project belongs to exactly one product. Each product's migration runner refuses any project not
+listed in that product's `config/database-targets.json`, and any database carrying another product's
+identity marker (`src/server/db/migration-target.ts`, shared by all three repositories).
+
+| Project | Project id | Organisation | Region | Product (owner) | Environment | Data | Status |
+|---|---|---|---|---|---|---|---|
+| `accounts-dev` | `egtlqrmujhxelczbyszj` | Outside In Development (free) | Sydney (`ap-southeast-2`) | **Account service** (identity for all products) | Development | Synthetic only | **Created 19 Nov 2026.** Foundation migration applied; identity marker `account_service / development`. Auth settings: see below |
+| `accounts-prod` | — | ANI (Pro) | Sydney | Account service | Production | Real | Later, before first customer use |
+| `commandcentre-dev` | — | Outside In Development | Sydney | Command Centre | Development | Synthetic only | Later, at first deploy |
+| `commandcentre-prod` | — | ANI (Pro) | Sydney | Command Centre | Production | Real | Later |
+| `reeldeal` | `jzshbaqfrrgsyiciuzfe` | (Reel Deal's organisation) | Sydney | **Reel Deal** | Production | Real | Existing; not managed from these repositories |
+| (old Tokyo project) | `ahclyplubhkhggonkfnj` | Outside In Development | Tokyo | None (created automatically, empty) | — | None | Paused 17 Nov 2026; can be deleted |
+| ~~`accounts-dev`~~ | ~~`xmqivpwwdksahxkkamgm`~~ | Outside In Development | Sydney | — | — | — | **Deleted 19 Nov 2026**: it had been given Reel Deal's schema by mistake (`decisions.md`) |
+
+Findable runs on its own infrastructure (`anigemmill/Tourism-AI-Growth-Platform`), not on these
+Supabase projects.
+
+Staging: none yet for any product. If one is added, it gets its own project, its own row here and its
+own `staging` entry in each product's `config/database-targets.json`; never a shared project.
+
+### `accounts-dev` Auth settings (set in the dashboard; the database tools cannot change them)
+
+From `docs/identity-architecture.md` §6 step 1, matching `scripts/auth-local.ts`:
+
+| Setting | Value |
+|---|---|
+| JWT signing keys | Asymmetric (ES256 or RS256) as the current key; legacy HS256 secret not used by products |
+| OAuth 2.1 server | On; authorisation path `/oauth/consent` |
+| Site URL | `http://localhost:3100` until the account pages are deployed |
+| Redirect URLs | `http://localhost:3100/**` and the local test client `http://localhost:4555/**` |
+| Email provider | On; sign-ups allowed; **Confirm email on** |
+| Magic link | On (part of the email provider) |
+| Minimum password length | 12 |
+| Refresh token rotation | On |
+| MFA (TOTP) | Enrolment and verification on |
+| Access token lifetime (JWT expiry) | 900 seconds |
+| Other providers (Google, Microsoft, phone, anonymous) | Off for now |

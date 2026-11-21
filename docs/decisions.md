@@ -53,3 +53,24 @@ records the ones that shape this service.
   re-runs.
 - **Local Supabase Auth** is the official release binary, pinned by version and SHA-256 (Supabase
   publishes no checksums, so the hash pins the file that was reviewed). Not used in CI.
+
+## 2026-11-19: `accounts-dev` rebuilt; migration target guard (approved by the owner)
+
+- **Incident.** On 17 Nov the first `accounts-dev` (`xmqivpwwdksahxkkamgm`) was created from a Reel
+  Deal session, which then applied Reel Deal's eight migrations to it, taking it for a Reel Deal test
+  project. No data was written and no Auth setting was changed. Root cause: nothing in any product's
+  migration tooling checked which database it was pointed at.
+- **Rebuilt.** The owner deleted that project. A new `accounts-dev` (`egtlqrmujhxelczbyszj`, Outside
+  In Development, Sydney, US$0) was created on 19 Nov with only this service's foundation migration
+  and its identity marker. Auth settings are set by the owner in the dashboard (`environments.md`),
+  because the database tools cannot change them.
+- **Migration target guard** in all three repositories (`src/server/db/migration-target.ts`, shared
+  verbatim): each product lists its Supabase project per environment in `config/database-targets.json`;
+  runners refuse unlisted projects, unverifiable hosts and databases carrying another product's meta
+  schema or identity marker (a comment on the product's own meta schema); a missing marker is recorded
+  on the first verified run. Fails closed; no override switch. Reel Deal's change is limited to its
+  two command-line runners.
+- **Development environment cleaned up.** The cloud environment used for this work now allows only
+  the new `accounts-dev` among Supabase hosts; the deleted project and Reel Deal's production project
+  were removed from it, so development sessions cannot reach production.
+- **Account schema proposed** for review before any migration: `docs/schema-proposal.md` (A3–A4).
