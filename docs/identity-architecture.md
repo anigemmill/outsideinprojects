@@ -70,7 +70,8 @@ only one being built; nothing else in the repositories duplicates it.
    with every request to the website, and a script running on the website runs with the same origin
    as Reel Deal's app pages (Reel Deal's `launch-domain.md` notes the shared cookies).
 3. Reel Deal is about to open its **own** sign-in. Every account created there will have to be
-   migrated later (§9) **[DECIDE, §12]**.
+   migrated later (§9). **Decided (D4, 22 Nov): it will not open standalone registration while the
+   shared identity service is built.**
 4. Findable's staff accounts and customer accounts are in one table; they separate into platform staff
    and organisation members when Findable moves (§9).
 
@@ -93,8 +94,8 @@ flowchart TB
   AUTH["Supabase Auth (account project)<br/>issuer, OAuth 2.1 server, JWKS"]
   ADB[("Account DB<br/>orgs · memberships · access · entitlements · outbox")]
   subgraph Products["Product apps, each its own origin, deployment and database"]
-    CC["commandcentre.theoutsidein.nz<br/>[DECIDE name]"]
-    FD["findable.theoutsidein.nz<br/>[DECIDE name]"]
+    CC["commandcentre.theoutsidein.nz"]
+    FD["findable.theoutsidein.nz"]
     RD["reeldeal.theoutsidein.nz"]
   end
   CCDB[("Command Centre DB")]
@@ -149,7 +150,7 @@ redirects are seamless and `SameSite=Lax` cookies behave predictably. Because th
 cross-subdomain requests are **not** blocked by `SameSite`, so each product keeps its own CSRF
 protection (Next.js server actions' origin check, already in Reel Deal and Command Centre).
 
-**Recommendation:** paths for marketing, origins for apps. **[DECIDE, §12 D1–D2]**
+**Decided (D2, 22 Nov 2026):** paths for marketing, separate origins for signed-in apps.
 
 ### 3.2 Routing summary (Proposed)
 
@@ -197,7 +198,7 @@ code and refresh flows only (no client credentials). The feature is **beta**, fr
 
 | Session | Lives | Lasts | Holds |
 |---|---|---|---|
-| Account session | `app.theoutsidein.nz`, Supabase Auth cookies, httpOnly | Until sign-out or refresh-token expiry (inactivity timeout in production **[DECIDE]**) | The person's main sign-in. Only the account app ever sees it |
+| Account session | `app.theoutsidein.nz`, Supabase Auth cookies, httpOnly | Until sign-out or refresh-token expiry (inactivity timeout in production: to be reviewed under D7) | The person's main sign-in. Only the account app ever sees it |
 | Product session | Each product's own origin, one encrypted httpOnly cookie | Access token 15 min, refreshed server-side with the product's refresh token | That product's tokens only. Never readable by browser JavaScript, never sent to another product |
 
 The account session is never shared with a product, so a compromised product cannot act on the
@@ -207,7 +208,7 @@ account pages or in another product.
 
 | Action | Effect |
 |---|---|
-| Sign out in a product | Clears that product's cookie and revokes its refresh token. The account session and other products stay signed in **[DECIDE: or should product sign-out also end the account session?]** |
+| Sign out in a product | Clears that product's cookie and revokes its refresh token. The account session and other products stay signed in (**Decided** D6) |
 | Sign out everywhere (account page) | Ends the account session and revokes all refresh tokens, including the products' (**to verify** that Supabase revokes OAuth-client refresh tokens with a global sign-out); publishes `session.revoked`; each product drops its sessions for that person on receipt. Remaining risk: an access token already issued stays valid until it expires (at most 15 minutes), so products also check the mirror for revoked sessions on sensitive actions |
 | Removed from an organisation | `membership.removed` event; the product refuses that organisation on the next request, whatever the token says |
 
@@ -273,7 +274,7 @@ not a code change in the other products.
 Findable is live on that address today, so it changes in steps, each separately approved:
 
 1. Build and test the account service in development (`accounts-dev`, localhost).
-2. Give Findable's app its own address (for example `findable.theoutsidein.nz` **[DECIDE]**) alongside
+2. Give Findable's app its own address, `findable.theoutsidein.nz` (**Decided** D5), alongside
    `app.theoutsidein.nz`: add the domain in Vercel, add the new Google OAuth callback next to the old
    one (the authorised domain `theoutsidein.nz` already covers subdomains), switch Findable's
    `APP_URL`, update the website's `findableAppUrl`. Keep `app.theoutsidein.nz` serving Findable while
@@ -285,7 +286,9 @@ Findable is live on that address today, so it changes in steps, each separately 
 
 Alternative with no Findable move: keep Findable on `app.theoutsidein.nz` and put the account app on
 `account.theoutsidein.nz`. Simpler and safer short term, but the shared entry point would not be
-`app.` **[DECIDE, §12 D1]**.
+`app.`. **Not chosen**: D1 (22 Nov) keeps `app.theoutsidein.nz` for the account app.
+
+The full migration plan: `integrations/findable-migration.md`.
 
 ## 6. Token validation
 
@@ -336,7 +339,7 @@ This verifier is the same in every product, so it is written once in the shared 
 | Risk | Mitigation |
 |---|---|
 | A product's token replayed at another product | `client_id` check (§6.2 step 3) |
-| A product's token used against the **account service's own Data API** (Supabase accepts OAuth tokens there, with RLS applied) | Account service RLS assumes any product, or a stolen product token, may call it as the person: no customer writes through the Data API, reads limited to what the person may see; consider removing `public` from the account project's exposed schemas **[DECIDE in A3]** |
+| A product's token used against the **account service's own Data API** (Supabase accepts OAuth tokens there, with RLS applied) | Account service RLS assumes any product, or a stolen product token, may call it as the person: no customer writes through the Data API, reads limited to what the person may see; consider removing `public` from the account project's exposed schemas (to decide in roadmap step 3; `security-review.md` F3) |
 | A product's client secret leaks | It cannot mint tokens (asymmetric keys); it allows code exchange only for that client after a real sign-in. Rotate the secret; secrets live only in each product's host secret store |
 | A compromised product | Separate origins (§3.1), separate databases, its own tokens only; the account session and other products are out of reach |
 | Account service down | Signed-in people keep working (offline verification, mirrors); new sign-ins wait |
@@ -361,7 +364,7 @@ This verifier is the same in every product, so it is written once in the shared 
 | Local | Local Postgres; tests set verified claims directly; optional local Supabase Auth runner | Each product's local setup | Synthetic |
 | Development | `accounts-dev` (Supabase `egtlqrmujhxelczbyszj`); account app on `http://localhost:3100` | Localhost ports: Command Centre 3000 **[proposed: Reel Deal 3001, Findable 3002]** | Synthetic only, never copied from production |
 | Staging | None yet. If added: its own account project and its own product projects, never shared | — | Synthetic |
-| Production | `accounts-prod` (paid organisation); account app on `https://app.theoutsidein.nz` **[DECIDE D1]** | Each product's production host | Real |
+| Production | `accounts-prod` (paid organisation); account app on `https://app.theoutsidein.nz` (**Decided** D1, after Findable's move) | Each product's production host | Real |
 
 Separation rules (**Decided**): development and production never share a project, keys, OAuth
 clients or secrets; each product accepts exactly one issuer per environment (tested); no production
@@ -378,7 +381,7 @@ old sign-in available for a week; then Reel Deal.
 |---|---|---|
 | Command Centre | Nobody yet | Built on the shared account from the start (M2b) |
 | Findable | Pilot operators and Te Puia; The Outside In staff | Each business becomes an organisation (ids preserved); `UserBusiness` links become memberships; staff become **platform staff**, not members. Passwords: scrypt hashes probably can't be imported into Supabase Auth (**unverified**), so people set a new password through an emailed link; TOTP factors are re-enrolled. Findable's Stripe billing moves to the account service later (A9). The pilot deployment can keep its own sign-in until the pilot ends |
-| Reel Deal | Nobody yet (sign-in not open) | If it joins before opening sign-in: no migration at all. If it opens its own sign-in first: import its Supabase Auth users and organisations with ids preserved, then lock its Auth **[DECIDE D4]** |
+| Reel Deal | Nobody yet (sign-in not open) | If it joins before opening sign-in: no migration at all. If it opens its own sign-in first: import its Supabase Auth users and organisations with ids preserved, then lock its Auth. **Decided (D4): it waits**, so no migration is expected |
 
 Duplicate people (the same email in two products) are merged only by verified email, after the person
 signs in, never silently.
@@ -396,28 +399,49 @@ signs in, never silently.
 | `app.theoutsidein.nz` handover (§5.4) | Hosting, DNS | The shared entry point |
 | `theoutsidein.nz/command-centre/` pages | Website | Command Centre marketing |
 
-## 11. Implementation sequence (Proposed)
+## 11. Implementation sequence
 
-1. **A2 completion in development:** set the approved `accounts-dev` settings; register a test client;
-   turn on the OAuth server; run the end-to-end flow; record real token claims in §6.1.
-2. **Shared verifier** in the foundation package, tested against a local issuer and then `accounts-dev`.
-3. **A3–A4** (organisations, memberships, invitations, product access, entitlements) from the approved
-   schema proposal, with isolation tests.
-4. **A5–A6** (service tokens, events) and **Command Centre M2b** against them.
-5. **Domains:** decide D1–D3; give Findable its own address (§5.4 step 2).
-6. **Account app in production** (`accounts-prod`, app host), then Findable's move (staging first), then
-   Reel Deal.
+The roadmap is kept in one place: `plan.md` (revised 22 Nov 2026 to the owner's order, with the
+dependency review). Product plans: `integrations/command-centre.md` (first integration),
+`integrations/reel-deal.md`, `integrations/findable-migration.md`. Security gate:
+`security-review.md`.
 
-Each step is separately approved. Nothing here changes DNS, hosting, Auth settings or production data.
+Nothing in this document changes DNS, hosting, Auth settings or production data; each step is approved
+separately.
 
-## 12. Decisions needed
+## 12. Decisions (approved by the owner, 22 November 2026)
 
-| # | Decision | Recommendation |
+These are approved **architectural directions**, not approval to change DNS, hosting or production.
+
+| # | Decision |
+|---|---|
+| D1 | `app.theoutsidein.nz` will ultimately become the central Outside In account service, **after Findable has been safely migrated** off it |
+| D2 | Signed-in product applications run on **separate origins** |
+| D3 | Reel Deal's signed-in application uses **`reeldeal.theoutsidein.nz`** |
+| D4 | Reel Deal does **not** open standalone customer registration while the shared identity service is being developed |
+| D5 | Hostname convention adopted (table below) |
+| D6 | Product-level sign-out and global sign-out are **distinct** behaviours |
+| D7 | A secure session policy is developed; the proposed 30-day inactivity timeout and MFA requirements are **reviewed before they are implemented** |
+
+### Approved hostnames (D5)
+
+| Address | Purpose | Today |
 |---|---|---|
-| D1 | `app.theoutsidein.nz`: the Outside In account (sign-in, launcher, account), with Findable moving to its own address first; or keep Findable there and use `account.theoutsidein.nz` | The account app, after Findable moves (§5.4), as you proposed |
-| D2 | Signed-in product apps on their own origins (`<product>.theoutsidein.nz`) rather than paths under one host | Own origins (§3.1); marketing stays on paths |
-| D3 | Reel Deal's signed-in app moves to `reeldeal.theoutsidein.nz` (already live) when it joins the shared account, with marketing staying at `theoutsidein.nz/reeldeal/` | Yes |
-| D4 | Reel Deal: open its own sign-in now (customers migrate later) or wait for the shared account | Wait if launch timing allows; otherwise open, and plan the import |
-| D5 | Product hostnames (e.g. `findable.`, `commandcentre.` or `command-centre.`) | Short, permanent names; decide once |
-| D6 | Product sign-out ends only that product's session, or the account session too | Only that product's; "sign out everywhere" on the account page |
-| D7 | Production session policy: inactivity timeout, MFA required for owners and admins | 30-day inactivity; MFA required for owners and admins |
+| `theoutsidein.nz` | Parent website | Live (Netlify) |
+| `theoutsidein.nz/findable/` | Findable marketing | Live |
+| `theoutsidein.nz/reeldeal/` | Reel Deal marketing | Live (currently also serves Reel Deal's app pages) |
+| `theoutsidein.nz/command-centre/` | Command Centre marketing | Not built |
+| `app.theoutsidein.nz` | Central Outside In account service, after Findable's migration | Findable's live app today |
+| `findable.theoutsidein.nz` | Findable application | Not set up |
+| `reeldeal.theoutsidein.nz` | Reel Deal application | Exists (Vercel), behind the website proxy |
+| `commandcentre.theoutsidein.nz` | Command Centre application | Not set up |
+
+### Still open
+
+| # | Question | Where |
+|---|---|---|
+| O1 | Session policy values (inactivity timeout, MFA for owners and admins) | D7 review, before production |
+| O2 | Account project's Data API exposure | Roadmap step 3; `security-review.md` F3 |
+| O3 | Real token claims (`aud`, `amr`/`aal`, lifetimes, refresh and revocation behaviour) | Roadmap step 2 |
+| O4 | Cost of `accounts-prod` and production hosting | Before roadmap step 9 |
+| O5 | Whether adding redirect URIs affects Findable's Google OAuth verification | Before Findable phase A |

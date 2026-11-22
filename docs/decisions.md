@@ -121,3 +121,28 @@ records the ones that shape this service.
   (RLS applies), so account service RLS must assume a product, or a stolen product token, can call it
   as the person. To settle in A3 (possibly removing `public` from the exposed schemas).
 - Nothing changed in DNS, hosting, Auth settings or any production system.
+
+## 2026-11-22: architecture decisions D1–D7 (approved by the owner)
+
+Approved architectural directions, **not** approval to change DNS, hosting or production. Full text
+and the hostname table: `identity-architecture.md` §12.
+
+- **D1** `app.theoutsidein.nz` becomes the central Outside In account service after Findable has been
+  safely migrated off it. **D2** signed-in product apps run on separate origins. **D3** Reel Deal's
+  signed-in app uses `reeldeal.theoutsidein.nz`. **D4** no standalone Reel Deal registration while the
+  shared identity service is built. **D5** hostnames: `findable.`, `reeldeal.` and
+  `commandcentre.theoutsidein.nz` for the apps; marketing on `theoutsidein.nz/<product>/`. **D6**
+  product sign-out and global sign-out are distinct. **D7** a secure session policy is developed; the
+  30-day inactivity timeout and MFA requirements are reviewed before implementation.
+- **Command Centre is the first integration**, as the lowest-risk test of the shared identity design
+  (`integrations/command-centre.md`); it starts only once the security gate is met.
+- **Roadmap revised** to the owner's order (`plan.md`), with these dependency changes: events move into
+  step 5, before any product integration; the account UI can overlap Command Centre's integration; a
+  production step (`accounts-prod`, cost approval) is added before Findable; platform staff support
+  must precede Findable's shared sign-in; Findable's address move is on the critical path for any
+  production use of the account service.
+- **Security review completed as a design review** (`security-review.md`); verification of real token
+  behaviour is roadmap step 2. Finding F1 fixed: `requireUser()` now fails closed when the MFA level
+  can't be determined (it protects the consent page that approves product sign-ins).
+- **Plans written:** Reel Deal preparation and integration (`integrations/reel-deal.md`) and Findable's
+  three-phase migration (`integrations/findable-migration.md`). Nothing executed.
