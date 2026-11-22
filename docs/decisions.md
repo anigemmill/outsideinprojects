@@ -94,4 +94,30 @@ records the ones that shape this service.
   without one (e.g. the account pages' own sessions). To be confirmed against a real token in A2
   step 3. Command Centre's copies of the identity spec point here as the master.
 - **Open:** will all products live under one domain? The OAuth server is recommended either way, and
-  is the only workable route if any product keeps its own domain.
+  is the only workable route if any product keeps its own domain. *(Answered 22 Nov: below.)*
+
+## 2026-11-22: ecosystem domains and the shared entry point (owner direction; architecture proposed)
+
+- **Owner direction.** The Outside In is the parent ecosystem of three independently usable products.
+  Confirmed marketing URLs: `https://theoutsidein.nz/findable/` and `https://theoutsidein.nz/reeldeal/`;
+  parent site `https://theoutsidein.nz/`; proposed `https://theoutsidein.nz/command-centre/`.
+  `https://app.theoutsidein.nz/` is the potential shared application entry point. Start from the
+  existing URL structure; applications may stay independently deployed.
+- **Verified today (repositories, 22 Nov):** `app.theoutsidein.nz` is **Findable's live production
+  app**; `theoutsidein.nz` is Netlify, which also proxies `/reeldeal/*` to the whole Reel Deal app
+  (website and sign-in pages, sign-in not yet open); no central identity runs in production; Findable
+  and Reel Deal each have their own sign-in. Details: `identity-architecture.md` §2.
+- **Consolidation.** `identity-architecture.md` is now the single ecosystem architecture document
+  (identity, domains, sessions, token validation, migration). `spec.md` points to it; Command Centre's
+  ecosystem page is reduced to Command Centre's part and points here.
+- **Proposed (awaiting decisions D1–D7, `identity-architecture.md` §12):** marketing stays on
+  `theoutsidein.nz` paths; `app.theoutsidein.nz` becomes the Outside In account (sign-in, organisation
+  choice, product launcher, account and billing) after Findable's app moves to its own address; each
+  signed-in product app runs on its own origin under `theoutsidein.nz` for browser isolation; Reel
+  Deal's signed-in app moves to `reeldeal.theoutsidein.nz` when it joins the shared account.
+- **Token claims stay unverified** until A2 step 3, except the issuer, ES256 JWKS, grant types and
+  disabled OAuth server observed on 21 Nov. Recorded per item in `identity-architecture.md` §6.1.
+- **New security finding:** Supabase accepts OAuth access tokens on the account project's own Data API
+  (RLS applies), so account service RLS must assume a product, or a stolen product token, can call it
+  as the person. To settle in A3 (possibly removing `public` from the exposed schemas).
+- Nothing changed in DNS, hosting, Auth settings or any production system.

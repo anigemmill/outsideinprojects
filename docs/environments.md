@@ -25,7 +25,7 @@ Rules:
 
 | Variable | Secret? | Purpose | Local | Development | Production |
 |---|---|---|---|---|---|
-| `APP_URL` | No | Public URL of the account pages | `http://localhost:3100` | dev URL | `https://account.[DOMAIN]` |
+| `APP_URL` | No | Public URL of the account pages | `http://localhost:3100` | dev URL | `https://app.theoutsidein.nz` (proposed, `identity-architecture.md` §12 D1; alternative `https://account.theoutsidein.nz`) |
 | `DATABASE_URL` | **Yes** | Direct Postgres connection for migrations and server queries | local Postgres | `accounts-dev` pooler URL | `accounts-prod` pooler URL |
 | `SUPABASE_URL` | No | Supabase Auth endpoint for the account pages (read at start-up, not build time) | `accounts-dev` URL | `accounts-dev` URL | `accounts-prod` URL |
 | `SUPABASE_PUBLISHABLE_KEY` | No (public by design; RLS protects data). Read on the server only, so it isn't baked into the build |  Sign-in calls from the account pages' server | dev key | dev key | prod key |
@@ -61,12 +61,13 @@ identity marker (`src/server/db/migration-target.ts`, shared by all three reposi
 | `accounts-prod` | — | ANI (Pro) | Sydney | Account service | Production | Real | Later, before first customer use |
 | `commandcentre-dev` | — | Outside In Development | Sydney | Command Centre | Development | Synthetic only | Later, at first deploy |
 | `commandcentre-prod` | — | ANI (Pro) | Sydney | Command Centre | Production | Real | Later |
-| `reeldeal` | `jzshbaqfrrgsyiciuzfe` | (Reel Deal's organisation) | Sydney | **Reel Deal** | Production | Real | Existing; not managed from these repositories |
+| `reeldeal` | `jzshbaqfrrgsyiciuzfe` | (Reel Deal's organisation) | Sydney | **Reel Deal** | Production | Real (0 users; sign-in not open, 22 Nov 2026) | Existing; not managed from these repositories |
+| Findable production | `hescoabpcjukmgeopjnq` | ANI | Sydney | **Findable** (database only, through Prisma; Findable does not use Supabase Auth) | Production | Real (pilot operators) | Existing; serves `app.theoutsidein.nz`; not managed from these repositories |
 | (old Tokyo project) | `ahclyplubhkhggonkfnj` | Outside In Development | Tokyo | None (created automatically, empty) | — | None | Paused 17 Nov 2026; can be deleted |
 | ~~`accounts-dev`~~ | ~~`xmqivpwwdksahxkkamgm`~~ | Outside In Development | Sydney | — | — | — | **Deleted 19 Nov 2026**: it had been given Reel Deal's schema by mistake (`decisions.md`) |
 
-Findable runs on its own infrastructure (`anigemmill/Tourism-AI-Growth-Platform`), not on these
-Supabase projects.
+Findable (`anigemmill/Tourism-AI-Growth-Platform`) also has a staging Supabase project of its own
+(its `docs/STAGING.md`). Live addresses for every product: `identity-architecture.md` §2.1.
 
 Staging: none yet for any product. If one is added, it gets its own project, its own row here and its
 own `staging` entry in each product's `config/database-targets.json`; never a shared project.
@@ -99,8 +100,8 @@ the plan for `accounts-prod`.
 | | Inactivity timeout, time-boxed sessions, single session per user | Off | Consider 30-day inactivity [CONFIRM]; single session off |
 | JWT signing | Current key | **ES256 asymmetric** (already current; confirmed from the public JWKS, 21 Nov 2026) | ES256, generated in that project |
 | | Legacy HS256 secret and legacy API keys | Present but unused by products; use the new publishable and secret keys | Disable legacy API keys once unused |
-| URLs | Site URL | `http://localhost:3100` | `https://account.[DOMAIN]` |
-| | Redirect URLs (email links) | `http://localhost:3100/**`, `http://localhost:4555/**` | `https://account.[DOMAIN]/**` only |
+| URLs | Site URL | `http://localhost:3100` | `https://app.theoutsidein.nz` (proposed, D1) |
+| | Redirect URLs (email links) | `http://localhost:3100/**`, `http://localhost:4555/**` | `https://app.theoutsidein.nz/**` only (proposed, D1) |
 | OAuth 2.1 server | Enabled | **Off until A2 step 3** (first end-to-end test with a product client) | On before Command Centre's first deployment |
 | | Authorisation path | `/oauth/consent` | `/oauth/consent` |
 | | Dynamic client registration | **Off** | **Off** |
