@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { NotConfigured } from "@/components/auth/not-configured";
 import { AuthShell } from "@/components/auth/shell";
 import { FormMessage, SubmitButton } from "@/components/auth/ui";
-import { decideConsent, describeScope, firstPartyClientIds, type AuthorizationDetails } from "@/lib/auth/consent";
+import { allowedRedirectOrigins, decideConsent, describeScope, firstPartyClientIds, redirectAllowed, type AuthorizationDetails } from "@/lib/auth/consent";
 import { requireUser } from "@/lib/auth/session";
 import { supabaseServer } from "@/lib/supabase/server";
 import { authConfigured, env } from "@/server/env";
@@ -37,18 +37,26 @@ export default async function ConsentPage({ searchParams }: { searchParams: Prom
       </AuthShell>
     );
   }
-  const decision = decideConsent(data as AuthorizationDetails, firstPartyClientIds(env().FIRST_PARTY_CLIENT_IDS));
+  const allowed = allowedRedirectOrigins(env().PRODUCT_REDIRECT_ORIGINS);
+  const decision = decideConsent(data as AuthorizationDetails, firstPartyClientIds(env().FIRST_PARTY_CLIENT_IDS), allowed);
+  if (decision.kind === "refuse") {
+    return (
+      <AuthShell title="This application isn't allowed to sign you in">
+        <FormMessage error="The sign-in request would send you to an address this account doesn't recognise. Nothing was shared." />
+      </AuthShell>
+    );
+  }
   if (decision.kind === "redirect") redirect(decision.url);
   if (decision.kind === "auto-approve") {
     const approved = await supabase.auth.oauth.approveAuthorization(decision.authorizationId, { skipBrowserRedirect: true });
-    if (approved.error || !approved.data?.redirect_url) {
+    if (approved.error || !redirectAllowed(approved.data?.redirect_url, allowed)) {
       return (
         <AuthShell title="We couldn't finish signing you in">
           <FormMessage error="Go back to the application and try again." />
         </AuthShell>
       );
     }
-    redirect(approved.data.redirect_url);
+    redirect(approved.data!.redirect_url);
   }
 
   return (

@@ -16,6 +16,8 @@ const Schema = z.object({
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
   // OAuth client ids of the Outside In products, approved without a consent prompt.
   FIRST_PARTY_CLIENT_IDS: z.string().optional(),
+  // Origins product callbacks may use (comma-separated). Empty = every OAuth redirect is refused.
+  PRODUCT_REDIRECT_ORIGINS: z.string().optional(),
 });
 
 export type Env = z.infer<typeof Schema>;
