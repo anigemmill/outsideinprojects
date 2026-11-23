@@ -57,14 +57,15 @@ identity marker (`src/server/db/migration-target.ts`, shared by all three reposi
 
 | Project | Project id | Organisation | Region | Product (owner) | Environment | Data | Status |
 |---|---|---|---|---|---|---|---|
-| `accounts-dev` | `egtlqrmujhxelczbyszj` | Outside In Development (free) | Sydney (`ap-southeast-2`) | **Account service** (identity for all products) | Development | Synthetic only | **Created 19 Nov 2026.** Foundation migration applied; identity marker `account_service / development`. Auth settings: see below |
+| `accounts-dev` | `urdrrzqqtmeuwlxksuov` | **ANI** (Pro) | Sydney (`ap-southeast-2`) | **Account service** (identity for all products) | Development | Synthetic only | **Created 23 Nov 2026** (owner's instruction). Foundation migration applied; identity marker `account_service / development`. Auth settings: see below |
 | `accounts-prod` | — | ANI (Pro) | Sydney | Account service | Production | Real | Later, before first customer use |
-| `commandcentre-dev` | — | Outside In Development | Sydney | Command Centre | Development | Synthetic only | Later, at first deploy |
+| `commandcentre-dev` | — | [TO DECIDE: ANI or a development organisation] | Sydney | Command Centre | Development | Synthetic only | Later, at first deploy |
 | `commandcentre-prod` | — | ANI (Pro) | Sydney | Command Centre | Production | Real | Later |
 | `reeldeal` | `jzshbaqfrrgsyiciuzfe` | (Reel Deal's organisation) | Sydney | **Reel Deal** | Production | Real (0 users; sign-in not open, 22 Nov 2026) | Existing; not managed from these repositories |
 | Findable production | `hescoabpcjukmgeopjnq` | ANI | Sydney | **Findable** (database only, through Prisma; Findable does not use Supabase Auth) | Production | Real (pilot operators) | Existing; serves `app.theoutsidein.nz`; not managed from these repositories |
-| (old Tokyo project) | `ahclyplubhkhggonkfnj` | Outside In Development | Tokyo | None (created automatically, empty) | — | None | Paused 17 Nov 2026; can be deleted |
+| (old Tokyo project) | `ahclyplubhkhggonkfnj` | Outside In Development | Tokyo | None (created automatically, empty) | — | None | Paused 17 Nov 2026; no longer visible to the connector (23 Nov) |
 | ~~`accounts-dev`~~ | ~~`xmqivpwwdksahxkkamgm`~~ | Outside In Development | Sydney | — | — | — | **Deleted 19 Nov 2026**: it had been given Reel Deal's schema by mistake (`decisions.md`) |
+| ~~`accounts-dev`~~ | ~~`egtlqrmujhxelczbyszj`~~ | Outside In Development | Sydney | — | — | — | **Gone by 23 Nov 2026** (no longer exists; the Outside In Development organisation is no longer visible to the connector). Replaced by `urdrrzqqtmeuwlxksuov` |
 
 Findable (`anigemmill/Tourism-AI-Growth-Platform`) also has a staging Supabase project of its own
 (its `docs/STAGING.md`). Live addresses for every product: `identity-architecture.md` §2.1.

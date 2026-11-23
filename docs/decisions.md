@@ -146,3 +146,21 @@ and the hostname table: `identity-architecture.md` §12.
   can't be determined (it protects the consent page that approves product sign-ins).
 - **Plans written:** Reel Deal preparation and integration (`integrations/reel-deal.md`) and Findable's
   three-phase migration (`integrations/findable-migration.md`). Nothing executed.
+
+## 2026-11-23: `accounts-dev` recreated in the ANI organisation (owner's instruction)
+
+- The 19 Nov `accounts-dev` (`egtlqrmujhxelczbyszj`) no longer exists, and the Outside In Development
+  organisation is no longer visible to the Supabase connector, which now sees only **ANI** (Reel
+  Deal's and Findable's production projects are there too).
+- On the owner's instruction a new **`accounts-dev`** was created in **ANI**: `urdrrzqqtmeuwlxksuov`,
+  Sydney. Supabase raised no cost confirmation when creating it; ANI is a paid (Pro) organisation, so the
+  owner checks its billing (an extra project there was estimated at about US$10 a month on 17 Nov).
+- It holds only this service's foundation migration and its identity marker
+  (`account_service / development / urdrrzqqtmeuwlxksuov`); security advisor clean.
+  `config/database-targets.json` now lists it.
+- **Separation note:** development and production now share an organisation (billing and team), so
+  separation rests on separate projects, keys and OAuth clients, and on the migration target guard,
+  which refuses any project not listed for this product (Reel Deal's and Findable's included). The
+  17 Nov recommendation of a separate development organisation still stands as the stronger option.
+- Re-verified on the new project: issuer, ES256 signing key, grant types, OAuth server off, and the
+  full ID-token algorithm list (`RS256`, `HS256`, `ES256`), which confirms finding F4.

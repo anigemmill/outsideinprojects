@@ -296,14 +296,14 @@ The full migration plan: `integrations/findable-migration.md`.
 
 | Item | Status | Source |
 |---|---|---|
-| Issuer string `https://egtlqrmujhxelczbyszj.supabase.co/auth/v1` (development) | **Verified** (21 Nov) | `accounts-dev` OpenID discovery document |
-| Signing key ES256 (P-256), published in the JWKS with a `kid` | **Verified** (21 Nov) | `accounts-dev` JWKS |
-| Grant types authorization code + refresh only; response type `code`; scopes `openid profile email phone offline_access` | **Verified** (21 Nov) | Discovery document |
-| OAuth server off in `accounts-dev` | **Verified** (21 Nov) | The authorization-server endpoint answers "OAuth server is disabled" |
+| Issuer string `https://urdrrzqqtmeuwlxksuov.supabase.co/auth/v1` (development) | **Verified** (23 Nov, on the current `accounts-dev`) | `accounts-dev` OpenID discovery document |
+| Signing key ES256 (P-256), published in the JWKS with a `kid` | **Verified** (21 Nov; again 23 Nov on the current project) | `accounts-dev` JWKS |
+| Grant types authorization code + refresh only; response type `code`; scopes `openid profile email phone offline_access` | **Verified** (21 Nov; grant types again 23 Nov) | Discovery document |
+| OAuth server off in `accounts-dev` | **Verified** (21 Nov; again 23 Nov on the current project) | The authorization-server endpoint answers "OAuth server is disabled" |
 | Access tokens are Supabase JWTs carrying `sub` (user id), `role`, `client_id` | **Documented by Supabase, not verified** | Supabase OAuth 2.1 server guide |
 | `aud` value on OAuth access tokens (expected `authenticated`) | **Not verified** | — |
 | `amr` / `aal` (MFA level), `session_id`, `exp` = issue + 900 s | **Not verified** | — |
-| ID token claims, its signing algorithm, `nonce` handling | **Not verified.** The discovery document lists more than one ID-token algorithm, including at least one beginning "H…" (truncated in the check), so products must not accept whatever the token header says | Discovery document |
+| ID token claims, its signing algorithm, `nonce` handling | **Not verified.** The discovery document advertises ID-token algorithms **`RS256`, `HS256` and `ES256`** (**Verified** 23 Nov), so products must refuse HS256 and must not accept whatever the token header says | Discovery document |
 | Refresh tokens rotate; reuse after rotation is rejected | **Not verified** | — |
 | `redirect_uri` exact matching | **Not verified** | — |
 | Global sign-out revokes OAuth clients' refresh tokens | **Not verified** | — |
@@ -362,7 +362,7 @@ This verifier is the same in every product, so it is written once in the shared 
 | Environment | Account (Auth + app) | Products | Data |
 |---|---|---|---|
 | Local | Local Postgres; tests set verified claims directly; optional local Supabase Auth runner | Each product's local setup | Synthetic |
-| Development | `accounts-dev` (Supabase `egtlqrmujhxelczbyszj`); account app on `http://localhost:3100` | Localhost ports: Command Centre 3000 **[proposed: Reel Deal 3001, Findable 3002]** | Synthetic only, never copied from production |
+| Development | `accounts-dev` (Supabase `urdrrzqqtmeuwlxksuov`, ANI organisation); account app on `http://localhost:3100` | Localhost ports: Command Centre 3000 **[proposed: Reel Deal 3001, Findable 3002]** | Synthetic only, never copied from production |
 | Staging | None yet. If added: its own account project and its own product projects, never shared | — | Synthetic |
 | Production | `accounts-prod` (paid organisation); account app on `https://app.theoutsidein.nz` (**Decided** D1, after Findable's move) | Each product's production host | Real |
 

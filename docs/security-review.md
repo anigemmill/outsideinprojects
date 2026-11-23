@@ -23,8 +23,8 @@ The gate: **no product (Command Centre first) integrates until every row in §1�
 | Control | Rule | Test | Status |
 |---|---|---|---|
 | Signature | Verify with the account project's JWKS (from the discovery document), cached, re-fetched once on an unknown `kid` | Valid token passes; tampered payload, wrong key and unknown `kid` after re-fetch fail | Designed |
-| Algorithm allow-list | **ES256 only** (RS256 added only if the project moves to it). Refuse `none`, every `HS*`, and any algorithm the header names that is not on the list; never let the header choose the key type | `alg: none`, HS256 signed with the public key bytes, RS/ES confusion all fail | Designed. ES256 key **Verified** in `accounts-dev` JWKS (21 Nov) |
-| Issuer | `iss` exactly equals the environment's issuer, e.g. `https://egtlqrmujhxelczbyszj.supabase.co/auth/v1` | Production token in development and vice versa fail | Designed. Issuer string **Verified** (21 Nov) |
+| Algorithm allow-list | **ES256 only** (RS256 added only if the project moves to it). Refuse `none`, every `HS*`, and any algorithm the header names that is not on the list; never let the header choose the key type | `alg: none`, HS256 signed with the public key bytes, RS/ES confusion all fail | Designed. ES256 key **Verified** in `accounts-dev` JWKS (21 Nov; again 23 Nov on the current project) |
+| Issuer | `iss` exactly equals the environment's issuer, e.g. `https://urdrrzqqtmeuwlxksuov.supabase.co/auth/v1` | Production token in development and vice versa fail | Designed. Issuer string **Verified** (23 Nov) |
 | Client | `client_id` exactly equals this product's client id in this environment; missing `client_id` fails | Another product's token, the account pages' own token, and a token with no `client_id` fail | Designed (**Decided** 21 Nov). Claim presence **Open**: real token in A2 step 3 |
 | Audience | Not used to tell products apart. Record its real value; if a hook later sets it per product, check both | — | **Open** (real value unknown) |
 | Expiry | `exp` in the future; `iat`/`nbf` not in the future; ≤ 60 s skew | Expired, not-yet-valid and far-future `iat` fail | Designed. 900 s lifetime **Open** |
@@ -103,7 +103,7 @@ processed revocation takes effect before the access token expires.
 | F1 | `requireUser()` skipped MFA if the assurance-level check returned an error (fail open), on the path that approves product sign-ins | Fail closed; pure rule with tests | **Fixed** 22 Nov |
 | F2 | Products must check `client_id`, not `aud` | Docs corrected | **Fixed** (docs) 21 Nov; verify with a real token |
 | F3 | OAuth tokens work on the account project's Data API | RLS assumption recorded; exposure decision in A3 | Open |
-| F4 | The discovery document lists more than one ID-token algorithm, including an `H…` one | Allow-list in the verifier; never trust the header | Designed |
+| F4 | The discovery document advertises ID-token algorithms `RS256`, `HS256`, `ES256` (**Verified** 23 Nov) | Allow-list in the verifier; never trust the header | Designed |
 | F5 | Global sign-out may not revoke OAuth clients' refresh tokens | Revocation list fed by events, regardless; verify in A2 step 3 | Open |
 | F6 | Reel Deal's app currently shares the `theoutsidein.nz` origin with the website | Moves to `reeldeal.theoutsidein.nz` when it joins (**Decided** D3) | Planned |
 
