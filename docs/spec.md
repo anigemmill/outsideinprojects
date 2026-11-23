@@ -7,9 +7,14 @@ Status: **decided by the owner (2026-11-16), design proposed.** One account sign
 product. An organisation adds products by subscribing to them. This replaces the earlier proposal of
 separate accounts linked by OAuth.
 
+**Architecture, domains, sessions and token validation:** `identity-architecture.md` is the single
+architecture document for the ecosystem. This spec keeps the account service's requirements and data
+model; where the two differ, `identity-architecture.md` and `decisions.md` win.
+
 ## 1. What the person sees
 
-1. They create **one Outside In account** (email, Google or Microsoft) and an organisation.
+1. They create **one Outside In account** (email, Google or Microsoft) and an organisation, on the
+   Outside In account app (proposed at `app.theoutsidein.nz`).
 2. They subscribe the organisation to one or more products: Command Centre, Findable, Reel Deal.
 3. A **product switcher** in every product's top bar lists the organisation's products. Subscribed
    products open straight away, with no second sign-in. Unsubscribed ones show "Add to your plan".
@@ -41,7 +46,7 @@ separate accounts linked by OAuth.
   transaction with `set local role authenticated` and `request.jwt.claims` set to the verified claims,
   so `auth.uid()` and RLS work exactly as on Supabase. Reel Deal already runs queries this way
   (`src/server/db/postgres.ts`), so the pattern is proven in the ecosystem.
-- **Single sign-on:** sign-in happens on the accounts domain (e.g. `account.[DOMAIN]`). Products are
+- **Single sign-on:** sign-in happens on the Outside In account app, proposed at `app.theoutsidein.nz` (`identity-architecture.md` §3, §12 D1). Products are
   OpenID Connect clients of it. A person signed in once is signed in to every product they can use;
   sign-out ends all product sessions.
 - **Mirrors:** organisations, memberships, product access and entitlements are mastered in accounts and
@@ -72,11 +77,18 @@ they are product data. Shared business context still flows through the `07` cont
 
 ## 4. Token claims
 
+Target claims. With Supabase's OAuth 2.1 server, the product is identified by `client_id` (its OAuth
+client id), not `aud`, which stays generic unless a Custom Access Token Hook sets it. Products verify
+`client_id` (`identity-architecture.md` §2). `org`, `org_role` and `products` need that hook too.
+The `aud` value shown is Supabase's default for signed-in users; confirm it against a real token in
+A2 step 3.
+
 ```json
 {
-  "iss": "https://account.[DOMAIN]",
+  "iss": "https://<accounts project>.supabase.co/auth/v1",
   "sub": "<user id>",
-  "aud": "command_centre",
+  "client_id": "<Command Centre's OAuth client id>",
+  "aud": "authenticated",
   "org": "<active organisation id>",
   "org_role": "admin",
   "products": ["command_centre", "reel_deal"],
